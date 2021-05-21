@@ -773,14 +773,14 @@ Flink是什么一句话概括Apache Flink是一个面向分布式数据流处理
                 <blockquote>
 <p>本文是例行介绍，熟悉的直接跳过 </p>
 </blockquote>
-<h1 id="大纲"><a href="#大纲" class="headerlink" title="大纲"></a>大纲</h1><p><strong>入门篇：</strong><br><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.online/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/1.png" alt="8bf609799f0f1265e71fa5bd0d498c45"></p>
-<p><strong>放弃篇：</strong><br><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.online/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/A44BE2B6-FBC9-4143-9743-F097B9C0FDD6.png" alt="563c79efb6518f991c732f1d95f97a62"></p>
+<h1 id="大纲"><a href="#大纲" class="headerlink" title="大纲"></a>大纲</h1><p><strong>入门篇：</strong><br><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/1.png" alt="8bf609799f0f1265e71fa5bd0d498c45"></p>
+<p><strong>放弃篇：</strong><br><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/A44BE2B6-FBC9-4143-9743-F097B9C0FDD6.png" alt="563c79efb6518f991c732f1d95f97a62"></p>
 <h2 id="Flink是什么"><a href="#Flink是什么" class="headerlink" title="Flink是什么"></a>Flink是什么</h2><h2 id="一句话概括"><a href="#一句话概括" class="headerlink" title="一句话概括"></a>一句话概括</h2><p>Apache Flink是一个面向分布式数据流处理和批量数据处理的开源计算平台，提供支持流处理和批处理两种类型应用的功能。</p>
 <h2 id="前身"><a href="#前身" class="headerlink" title="前身"></a>前身</h2><p>Apache Flink 的前身是柏林理工大学一个研究性项目， 在 2014 被 Apache 孵化器所接受，然后迅速地成为了Apache Software Foundation的顶级项目之一。</p>
 <h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><p>现有的开源计算方案，会把流处理和批处理作为两种不同的应用类型：流处理一般需要支持低延迟、Exactly-once保证，而批处理需要支持高吞吐、高效处理。<br>Flink是完全支持流处理，也就是说作为流处理看待时输入数据流是无界的；批处理被作为一种特殊的流处理，只是它的输入数据流被定义为有界的。</p>
-<h2 id="Flink组件栈"><a href="#Flink组件栈" class="headerlink" title="Flink组件栈"></a>Flink组件栈</h2><p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.online/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/6F963775-B91B-447F-959E-38B4029BE56D.png" alt="102b82e4ca65fa679cee53c017d830aa"></p>
+<h2 id="Flink组件栈"><a href="#Flink组件栈" class="headerlink" title="Flink组件栈"></a>Flink组件栈</h2><p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/6F963775-B91B-447F-959E-38B4029BE56D.png" alt="102b82e4ca65fa679cee53c017d830aa"></p>
 <h3 id="Deployment层"><a href="#Deployment层" class="headerlink" title="Deployment层"></a>Deployment层</h3><p>主要涉及了Flink的部署模式，Flink支持多种部署模式：本地、集群（Standalone/YARN）、云（GCE/EC2）</p>
-<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.online/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/F7406066-68CA-4BE7-9743-7FD65A0D722C.png" alt="cd3ae86f9ae0764f77af85696114d79b"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/F7406066-68CA-4BE7-9743-7FD65A0D722C.png" alt="cd3ae86f9ae0764f77af85696114d79b"></p>
 <h3 id="Runtime层"><a href="#Runtime层" class="headerlink" title="Runtime层"></a>Runtime层</h3><p>Runtime层提供了支持Flink计算的全部核心实现，比如：支持分布式Stream处理、JobGraph到ExecutionGraph的映射、调度等等，为上层API层提供基础服务</p>
 <h3 id="API层"><a href="#API层" class="headerlink" title="API层"></a>API层</h3><p>API层主要实现了面向无界Stream的流处理和面向Batch的批处理API，其中面向流处理对应DataStream API，面向批处理对应DataSet API </p>
 <h3 id="Libaries层"><a href="#Libaries层" class="headerlink" title="Libaries层"></a>Libaries层</h3><ul>
@@ -797,8 +797,8 @@ Flink是什么一句话概括Apache Flink是一个面向分布式数据流处理
 <li>支持有状态计算的Exactly-once语义</li>
 <li>提供DataStream API和DataSet API</li>
 </ul>
-<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.online/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/3DE5BD22-BFE2-49C4-8DA8-C42EAD1948FB.png" alt="d698791fc0eee2b74bfb9af430206705"></p>
-<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.online/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/0E6F6341-5EB0-40FD-9953-70C3F0904043.png" alt="f49a3e84af366184696c6c6800d84a50"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/3DE5BD22-BFE2-49C4-8DA8-C42EAD1948FB.png" alt="d698791fc0eee2b74bfb9af430206705"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/0E6F6341-5EB0-40FD-9953-70C3F0904043.png" alt="f49a3e84af366184696c6c6800d84a50"></p>
 <h2 id="Flink基本编程模型"><a href="#Flink基本编程模型" class="headerlink" title="Flink基本编程模型"></a>Flink基本编程模型</h2><blockquote>
 <ul>
 <li>Flink程序的基础构建模块是流(streams) 与 转换(transformations)</li>
@@ -806,15 +806,15 @@ Flink是什么一句话概括Apache Flink是一个面向分布式数据流处理
 </ul>
 </blockquote>
 <p>下面是一个由Flink程序映射为Streaming Dataflow的示意图:</p>
-<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.online/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/656C0986-42A7-4E76-B3CA-C0372395E451.png" alt="1cee64d1b99673231aa5315d579d5182"></p>
-<p>并行数据流示意图:<br><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.online/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/E6A4AF88-12D9-413A-A318-06A86ABDC1AF.png" alt="b51a95236221451ab1958f8aefc5af62"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/656C0986-42A7-4E76-B3CA-C0372395E451.png" alt="1cee64d1b99673231aa5315d579d5182"></p>
+<p>并行数据流示意图:<br><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/E6A4AF88-12D9-413A-A318-06A86ABDC1AF.png" alt="b51a95236221451ab1958f8aefc5af62"></p>
 <h2 id="Flink基本架构"><a href="#Flink基本架构" class="headerlink" title="Flink基本架构"></a>Flink基本架构</h2><blockquote>
 <ul>
 <li>Flink是基于Master-Slave风格的架构</li>
 <li>Flink集群启动时，会启动一个JobManager进程、至少一个TaskManager进程</li>
 </ul>
 </blockquote>
-<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.online/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/866EF50B-A9ED-461A-AC13-78BEBBDCCFC9.png" alt="7c947040b492ea28cd48252a0f1427a7"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Flink%E4%BB%8E%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83-Flink%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F.resources/866EF50B-A9ED-461A-AC13-78BEBBDCCFC9.png" alt="7c947040b492ea28cd48252a0f1427a7"></p>
 <h3 id="JobManager"><a href="#JobManager" class="headerlink" title="JobManager"></a>JobManager</h3><ul>
 <li><p>Flink系统的协调者，它负责接收Flink Job，调度组成Job的多个Task的执行</p>
 </li>
@@ -1866,5 +1866,5 @@ if (windowWidth > 768) {
 	 
 
 		
-    <script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/shizuku.model.json"},"display":{"position":"left","width":150,"height":200},"mobile":{"show":true},"react":{"opacity":0.7}});</script><script>!function(e){var r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function t(){for(var c=0;c<r.length;c++)t=r[c],void 0,0<=(n=t.getBoundingClientRect()).top&&0<=n.left&&n.top<=(e.innerHeight||document.documentElement.clientHeight)&&function(){var t,n,e,i,o=r[c];t=o,n=function(){r=r.filter(function(t){return o!==t})},e=new Image,i=t.getAttribute("data-original"),e.onload=function(){t.src=i,n&&n()},e.src=i}();var t,n}t(),e.addEventListener("scroll",function(){!function(t,n){clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(n)},500)}(t,e)})}(this);</script></body>
+    <script>!function(e){var r=Array.prototype.slice.call(document.querySelectorAll("img[data-original]"));function t(){for(var c=0;c<r.length;c++)t=r[c],void 0,0<=(n=t.getBoundingClientRect()).top&&0<=n.left&&n.top<=(e.innerHeight||document.documentElement.clientHeight)&&function(){var t,n,e,i,o=r[c];t=o,n=function(){r=r.filter(function(t){return o!==t})},e=new Image,i=t.getAttribute("data-original"),e.onload=function(){t.src=i,n&&n()},e.src=i}();var t,n}t(),e.addEventListener("scroll",function(){!function(t,n){clearTimeout(t.tId),t.tId=setTimeout(function(){t.call(n)},500)}(t,e)})}(this);</script><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/shizuku.model.json"},"display":{"position":"left","width":150,"height":200},"mobile":{"show":true},"react":{"opacity":0.7}});</script></body>
 </html>
