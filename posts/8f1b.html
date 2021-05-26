@@ -866,14 +866,14 @@ public GroupRange getSplitRange(int numSplits, int splitIndex) {
 <p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Apache-Flink-State.resources/FBDBA73F-4927-4834-8284-4893707EA6FB.png" alt="163e2e62bc6c6e513d7c7fb10cda954f"></p>
 <p>如上算法我们发现在进行扩容时候，大部分state还是落到本地的，如Task0只有KG-4被分出去，其他的还是保持在本地。同时我们也发现，一个job如果修改了maxParallelism的值那么会直接影响到Key-Groups的数量和key的分配，也会打乱所有的Key-Group的分配，目前在Apache Flink系统中统一将maxParallelism的默认值调整到4096，最大程度的避免无法扩容的情况发生。</p>
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本篇简单介绍了Apache Flink中State的概念，并重点介绍了OperatorState和KeyedState在扩容时候的处理方式。Apache Flink State是支撑Apache Flink中failover，增量计算，Window等重要机制和功能的核心设施。后续介绍failover，增量计算，Window等相关篇章中也会涉及State的利用，当涉及到本篇没有覆盖的内容时候再补充介绍。</p>
-<p>持续更新中…，如果遇到问题欢迎联系我，在文章最后评论区【留言和讨论】，当然，欢迎点击文章最后的打赏按键，请博主一杯冰阔乐，笑～**</p>
-
+<p><strong>持续更新中…，如果遇到问题欢迎联系我，在文章最后评论区【留言和讨论】，当然，欢迎点击文章最后的打赏按键，请博主一杯冰阔乐，笑～</strong></p>
 
 <table>
   <tbody><tr>
     <td><img width="100" src="https://hualei.site/medias/reward/alipay.bmp"></td>    <td><img width="100" src="https://hualei.site/medias/reward/wechat.bmp"></td>    <td><img width="100" src="https://hualei.site/medias/reward/zan.png"></td>   
   </tr>
 </tbody></table>
+
 
 <script>
         document.querySelectorAll('.github-emoji')
@@ -1363,30 +1363,29 @@ public GroupRange getSplitRange(int numSplits, int splitIndex) {
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fa fa-dot-circle-o"></i>&nbsp;本篇
-            </div>
+                <i class="fa fa-chevron-left"></i>&nbsp;上一篇</div>
             <div class="card">
-                <a href="/posts/8f1b.html">
+                <a href="/posts/42df.html">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="Apache-Flink-State">
+                        <img src="/medias/featureimages/16.jpg" class="responsive-img" alt="Apache-Flink-Watermark">
                         
-                        <span class="card-title">Apache-Flink-State</span>
+                        <span class="card-title">Apache-Flink-Watermark</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            在流计算场景中，数据会源源不断的流入Apache Flink系统，每条数据进入Apache Flink系统都会触发计算。如果我们想进行一个Count聚合计算，那么每次触发计算是将历史上所有流入的数据重新新计算一次，还是每次计算都是在上一次计算结果之上进行增量计算呢？
+                            在介绍Watermark相关内容之前我们先抛出一个具体的问题，在实际的流式计算中数据到来的顺序对计算结果的正确性有至关重要的影响，比如：某数据源中的某些数据由于某种原因(如：网络原因，外部存储自身原因)会有5秒的延时，也就是在实际时间的第1秒产生的数据有可能在第5秒中产生的数据之后到来(比如到Window处理节点).
                         
                     </div>
                     <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2020-08-05
-                            </span>
+                        <span class="publish-date">
+                            <i class="fa fa-clock-o fa-fw icon-date"></i>2020-08-12
+                        </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -1399,7 +1398,6 @@ public GroupRange getSplitRange(int numSplits, int splitIndex) {
                         </span>
                     </div>
                 </div>
-
                 
                 <div class="card-action article-tags">
                     
@@ -1644,7 +1642,7 @@ public GroupRange getSplitRange(int numSplits, int splitIndex) {
 
             
                 &nbsp; | &nbsp;字数统计:&nbsp;
-                <span class="white-color">34.4k</span> 字
+                <span class="white-color">36.7k</span> 字
             
 
             
