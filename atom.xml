@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://hualei.site/"/>
-  <updated>2021-05-26T09:05:44.760Z</updated>
+  <updated>2021-05-26T09:16:44.623Z</updated>
   <id>https://hualei.site/</id>
   
   <author>
@@ -17,11 +17,11 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
-    <link href="https://hualei.site/posts/0.html"/>
-    <id>https://hualei.site/posts/0.html</id>
-    <published>2021-05-26T09:06:35.377Z</published>
-    <updated>2021-05-26T09:05:44.760Z</updated>
+    <title>Apache-Flink-State</title>
+    <link href="https://hualei.site/posts/8f1b.html"/>
+    <id>https://hualei.site/posts/8f1b.html</id>
+    <published>2020-08-05T14:30:02.000Z</published>
+    <updated>2021-05-26T09:16:44.623Z</updated>
     
     <summary type="html">
     
@@ -29,12 +29,20 @@
       
         
         
-          &lt;p&gt;title: Apache-Flink-State&lt;br&gt;author: 华磊&lt;br&gt;top: false&lt;br&gt;cover: false&lt;br&gt;toc: true&lt;br&gt;mathjax: false&lt;br&gt;coverImg:
+          &lt;h2 id=&quot;实际问题&quot;&gt;&lt;a href=&quot;#实际问题&quot; class=&quot;headerlink&quot; title=&quot;实际问题&quot;&gt;&lt;/a&gt;实际问题&lt;/h2&gt;&lt;p&gt;在流计算场景中，数据会源源不断的流入Apache Flink系统，每条数据进入Apache
         
       
     
     </summary>
     
+      <category term="技术学习" scheme="https://hualei.site/categories/%E6%8A%80%E6%9C%AF%E5%AD%A6%E4%B9%A0/"/>
+    
+    
+      <category term="大数据" scheme="https://hualei.site/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/"/>
+    
+      <category term="互联网" scheme="https://hualei.site/tags/%E4%BA%92%E8%81%94%E7%BD%91/"/>
+    
+      <category term="Flink" scheme="https://hualei.site/tags/Flink/"/>
     
   </entry>
   

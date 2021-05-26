@@ -6,13 +6,10 @@
 
 <head><meta name="generator" content="Hexo 3.9.0">
     <meta charset="utf-8">
-    <meta name="keywords" content="Flink从入门到放弃(入门篇3)-DataSetAPI, BigData IT DeepLearning MachineLearning 华磊 hualei Java开发">
+    <meta name="keywords" content="Apache-Flink-State, BigData IT DeepLearning MachineLearning 华磊 hualei Java开发">
     <meta name="baidu-site-verification" content="fmlEuI34ir">
     <meta name="google-site-verification" content="KeoTn_OFy4ndJwXNmm2gMeQfPhd7alqE9vQDwI32KCY">
-    <meta name="description" content="编程结构public class SocketTextStreamWordCount {
-
-    public static void main(String[] args) throws Exception {
-        if (">
+    <meta name="description" content="实际问题在流计算场景中，数据会源源不断的流入Apache Flink系统，每条数据进入Apache Flink系统都会触发计算。如果我们想进行一个Count聚合计算，那么每次触发计算是将历史上所有流入的数据重新新计算一次，还是每次计算都是在">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -20,7 +17,7 @@
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Flink从入门到放弃(入门篇3)-DataSetAPI | 烂人不该拥有</title>
+    <title>Apache-Flink-State | 烂人不该拥有</title>
     <link rel="icon" type="image/png" href="/favicon.png">
 
     <link rel="stylesheet" type="text/css" href="/libs/awesome/css/font-awesome.min.css">
@@ -579,13 +576,13 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/1.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/5.jpg')">
     <div class="container">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
                     <div class="description center-align post-title">
-                        Flink从入门到放弃(入门篇3)-DataSetAPI
+                        Apache-Flink-State
                     </div>
                 </div>
             </div>
@@ -729,7 +726,7 @@
             <div class="post-info">
                 <div class="post-date info-break-policy">
                     <i class="fa fa-calendar-minus-o fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2020-07-15
+                    2020-08-05
                 </div>
 
                 <div class="post-author info-break-policy">
@@ -743,14 +740,14 @@
                     
                     <div class="info-break-policy">
                         <i class="fa fa-file-word-o fa-fw"></i>文章字数:&nbsp;&nbsp;
-                        3.4k
+                        3.2k
                     </div>
                     
 
                     
                     <div class="info-break-policy">
                         <i class="fa fa-clock-o fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                        15 分
+                        12 分
                     </div>
                     
                 
@@ -767,336 +764,117 @@
         <hr class="clearfix">
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h2 id="编程结构"><a href="#编程结构" class="headerlink" title="编程结构"></a>编程结构</h2><pre><code>public class SocketTextStreamWordCount {
+                <h2 id="实际问题"><a href="#实际问题" class="headerlink" title="实际问题"></a>实际问题</h2><p>在流计算场景中，数据会源源不断的流入Apache Flink系统，每条数据进入Apache Flink系统都会触发计算。如果我们想进行一个Count聚合计算，那么每次触发计算是将历史上所有流入的数据重新新计算一次，还是每次计算都是在上一次计算结果之上进行增量计算呢？答案是肯定的，Apache Flink是基于上一次的计算结果进行增量计算的。那么问题来了: “上一次的计算结果保存在哪里，保存在内存可以吗？”，答案是否定的，如果保存在内存，在由于网络，硬件等原因造成某个计算节点失败的情况下，上一次计算结果会丢失，在节点恢复的时候，就需要将历史上所有数据（可能十几天，上百天的数据）重新计算一次，所以为了避免这种灾难性的问题发生，Apache Flink 会利用State存储计算结果。本篇将会为大家介绍Apache Flink State的相关内容。</p>
+<h2 id="什么是State"><a href="#什么是State" class="headerlink" title="什么是State"></a>什么是State</h2><p>这个问题似乎有些”弱智”？不管问题的答案是否显而易见，但我还是想简单说一下在Apache Flink里面什么是State？State是指流计算过程中计算节点的中间计算结果或元数据属性，比如 在aggregation过程中要在state中记录中间聚合结果，比如 Apache Kafka 作为数据源时候，我们也要记录已经读取记录的offset，这些State数据在计算过程中会进行持久化(插入或更新)。所以Apache Flink中的State就是与时间相关的，Apache Flink任务的内部数据（计算数据和元数据属性）的快照。</p>
+<h2 id="为什么需要State"><a href="#为什么需要State" class="headerlink" title="为什么需要State"></a>为什么需要State</h2><p>与批计算相比，State是流计算特有的，批计算没有failover机制，要么成功，要么重新计算。流计算在 大多数场景 下是增量计算，数据逐条处理（大多数场景)，每次计算是在上一次计算结果之上进行处理的，这样的机制势必要将上一次的计算结果进行存储（生产模式要持久化），另外由于 机器，网络，脏数据等原因导致的程序错误，在重启job时候需要从成功的检查点(checkpoint，后面篇章会专门介绍)进行state的恢复。增量计算，Failover这些机制都需要state的支撑。</p>
+<h2 id="State-实现"><a href="#State-实现" class="headerlink" title="State 实现"></a>State 实现</h2><p>Apache Flink内部有四种state的存储实现，具体如下：</p>
+<ul>
+<li>基于内存的HeapStateBackend - 在debug模式使用，不 建议在生产模式下应用；</li>
+<li>基于HDFS的FsStateBackend - 分布式文件持久化，每次读写都产生网络IO，整体性能不佳；</li>
+<li>基于RocksDB的RocksDBStateBackend - 本地文件+异步HDFS持久化；</li>
+<li>还有一个是基于Niagara(Alibaba内部实现)NiagaraStateBackend - 分布式持久化- 在Alibaba生产环境应用；</li>
+</ul>
+<h2 id="State-持久化逻辑"><a href="#State-持久化逻辑" class="headerlink" title="State 持久化逻辑"></a>State 持久化逻辑</h2><p>Apache Flink版本选择用RocksDB+HDFS的方式进行State的存储，State存储分两个阶段，首先本地存储到RocksDB，然后异步的同步到远程的HDFS。 这样而设计既消除了HeapStateBackend的局限（内存大小，机器坏掉丢失等），也减少了纯分布式存储的网络IO开销。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Apache-Flink-State.resources/11AD7C2A-A1DD-4238-8226-AED47EF6F446.png" alt="c6e2f3f39188c48255c79834ab872c5e"></p>
+<h2 id="State-分类"><a href="#State-分类" class="headerlink" title="State 分类"></a>State 分类</h2><p>Apache Flink 内部按照算子和数据分组角度将State划分为如下两类：</p>
+<ul>
+<li><p>KeyedState - 这里面的key是我们在SQL语句中对应的GroupBy/PartitioneBy里面的字段，key的值就是groupby/PartitionBy字段组成的Row的字节数组，每一个key都有一个属于自己的State，key与key之间的State是不可见的；</p>
+</li>
+<li><p>OperatorState - Apache Flink内部的Source Connector的实现中就会用OperatorState来记录source数据读取的offset。 </p>
+</li>
+</ul>
+<h2 id="State-扩容重新分配"><a href="#State-扩容重新分配" class="headerlink" title="State 扩容重新分配"></a>State 扩容重新分配</h2><p>Apache Flink是一个大规模并行分布式系统，允许大规模的有状态流处理。 为了可伸缩性，Apache Flink作业在逻辑上被分解成operator graph，并且每个operator的执行被物理地分解成多个并行运算符实例。 从概念上讲，Apache Flink中的每个并行运算符实例都是一个独立的任务，可以在自己的机器上调度到网络连接的其他机器运行。</p>
+<p>Apache Flink的DAG图中只有边相连的节点🈶网络通信，也就是整个DAG在垂直方向有网络IO，在水平方向如下图的stateful节点之间没有网络通信，这种模型也保证了每个operator实例维护一份自己的state，并且保存在本地磁盘（远程异步同步）。通过这种设计，任务的所有状态数据都是本地的，并且状态访问不需要任务之间的网络通信。 避免这种流量对于像Apache Flink这样的大规模并行分布式系统的可扩展性至关重要。</p>
+<p>如上我们知道Apache Flink中State有OperatorState和KeyedState，那么在进行扩容时候（增加并发）State如何分配呢？比如：外部Source有5个partition，在Apache Flink上面由Srouce的1个并发扩容到2个并发，中间Stateful Operation 节点由2个并发并扩容的3个并发，如下图所示:</p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Apache-Flink-State.resources/60A3963C-B15F-456F-9B37-69C022B6491D.png" alt="9c48ca9908816902cd317a26e1fffa26"></p>
+<p>在Apache Flink中对不同类型的State有不同的扩容方法，接下来我们分别介绍。</p>
+<h2 id="OperatorState对扩容的处理"><a href="#OperatorState对扩容的处理" class="headerlink" title="OperatorState对扩容的处理"></a>OperatorState对扩容的处理</h2><p>我们选取Apache Flink中某个具体Connector实现实例进行介绍，以MetaQ为例，MetaQ以topic方式订阅数据，每个topic会有N&gt;0个分区，以上图为例，加上我们订阅的MetaQ的topic有5个分区，那么当我们source由1个并发调整为2个并发时候，State是怎么恢复的呢？<br>state 恢复的方式与Source中OperatorState的存储结构有必然关系，我们先看MetaQSource的实现是如何存储State的。首先MetaQSource 实现了ListCheckpointed<t extends="" serializable="">，其中的T是Tuple2&lt;InputSplit,Long&gt;，我们在看ListCheckpointed接口的内部定义如下：</t></p>
+<pre><code>public interface ListCheckpointed&lt;T extends Serializable&gt;; {
+List&lt;T&gt; snapshotState(long var1, long var3) throws Exception;
 
-    public static void main(String[] args) throws Exception {
-        if (args.length != 2){
-System.err.println("USAGE:\nSocketTextStreamWordCount &lt;hostname&gt; &lt;port&gt;");
-            return;
+void restoreState(List&amp;lt;T&amp;gt; var1) throws Exception;
+}</code></pre><p>我们发现 snapshotState方法的返回值是一个List<t>,T是Tuple2&lt;InputSplit,Long&gt;，也就是snapshotState方法返回List&lt;Tuple2&lt;InputSplit,Long&gt;&gt;,这个类型说明state的存储是一个包含partiton和offset信息的列表，InputSplit代表一个分区，Long代表当前partition读取的offset。InputSplit有一个方法如下：</t></p>
+<pre><code>public interface InputSplit extends Serializable {
+    int getSplitNumber();
+}</code></pre><p>也就是说，InputSplit我们可以理解为是一个Partition索引，有了这个数据结构我们在看看上面图所示的case是如何工作的？当Source的并行度是1的时候，所有打partition数据都在同一个线程中读取，所有partition的state也在同一个state中维护，State存储信息格式如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="/posts/8f1b.htm/736E827E-E4C1-4412-8F0C-F51AECB68329.png" alt="67cf069e8320cfeb0cf3fba127ed2cf9"></p>
+<p>如果我们现在将并发调整为2，那么我们5个分区的State将会在2个独立的任务（线程）中进行维护，在内部实现中我们有如下算法进行分配每个Task所处理和维护partition的State信息，如下：</p>
+<pre><code>List&lt;Integer&gt; assignedPartitions = new LinkedList&lt;&gt;();
+for (int i = 0; i &lt; partitions; i++) {
+        if (i % consumerCount == consumerIndex) {
+                assignedPartitions.add(i);
         }
-        String hostName = args[0];
-        Integer port = Integer.parseInt(args[1]);
-        final StreamExecutionEnvironment env = StreamExecutionEnvironment
-                .getExecutionEnvironment();
-        DataStream&lt;String&gt; text = env.socketTextStream(hostName, port);
+}</code></pre><p>这个求mod的算法，决定了每个并发所处理和维护partition的State信息，针对我们当前的case具体的存储情况如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Apache-Flink-State.resources/436E7A11-0256-4373-A3D4-ED5A4363B0E3.png" alt="b9840bd73df13cabe4252f6b0bd224a0"></p>
+<p>那么到现在我们发现上面扩容后State得以很好的分配得益于OperatorState采用了List<t>的数据结构的设计。另外大家注意一个问题，相信大家已经发现上面分配partition的算法有一个限制，那就是Source的扩容（并发数）是否可以超过Source物理存储的partition数量呢？答案是否定的，不能。目前Apache Flink的做法是提前报错，即使不报错也是资源的浪费，因为超过partition数量的并发永远分配不到待管理的partition。</t></p>
+<h2 id="KeyedState对扩容的处理"><a href="#KeyedState对扩容的处理" class="headerlink" title="KeyedState对扩容的处理"></a>KeyedState对扩容的处理</h2><p>对于KeyedState最容易想到的是hash(key) mod parallelism(operator) 方式分配state，就和OperatorState一样，这种分配方式大多数情况是恢复的state不是本地已有的state，需要一次网络拷贝，这种效率比较低，OperatorState采用这种简单的方式进行处理是因为OperatorState的state一般都比较小，网络拉取的成本很小，对于KeyedState往往很大，我们会有更好的选择，在Apache Flink中采用的是Key-Groups方式进行分配。</p>
+<h2 id="什么是Key-Groups"><a href="#什么是Key-Groups" class="headerlink" title="什么是Key-Groups"></a>什么是Key-Groups</h2><p>Key-Groups 是Apache Flink中对keyed state按照key进行分组的方式，每个key-group中会包含N&gt;0个key，一个key-group是State分配的原子单位。在Apache Flink中关于Key-Group的对象是 KeyGroupRange, 如下：</p>
+<pre><code>public class KeyGroupRange implements KeyGroupsList, Serializable {
+        ...
+        ...
+        private final int startKeyGroup;
+        private final int endKeyGroup;
+        ...
+        ...
+}</code></pre><p>KeyGroupRange两个重要的属性就是 startKeyGroup和endKeyGroup，定义了startKeyGroup和endKeyGroup属性后Operator上面的Key-Group的个数也就确定了。</p>
+<h2 id="什么决定Key-Groups的个数"><a href="#什么决定Key-Groups的个数" class="headerlink" title="什么决定Key-Groups的个数"></a>什么决定Key-Groups的个数</h2><p>key-group的数量在job启动前必须是确定的且运行中不能改变。由于key-group是state分配的原子单位，而每个operator并行实例至少包含一个key-group，因此operator的最大并行度不能超过设定的key-group的个数，那么在Apache Flink的内部实现上key-group的数量就是最大并行度的值。</p>
+<p>GroupRange.of(0, maxParallelism)如何决定key属于哪个Key-Group<br>确定好GroupRange之后，如何决定每个Key属于哪个Key-Group呢？我们采取的是取mod的方式，在KeyGroupRangeAssignment中的assignToKeyGroup方法会将key划分到指定的key-group中，如下：</p>
+<pre><code>public static int assignToKeyGroup(Object key, int maxParallelism) {
+  return computeKeyGroupForKeyHash(key.hashCode(), maxParallelism);
+}
 
-        DataStream&lt;Tuple2&lt;String, Integer&gt;&gt; counts 
-        text.flatMap(new LineSplitter())
-                .keyBy(0)
-                .sum(1);
-        counts.print();
-        env.execute("Java WordCount from SocketTextStream Example");
-    }</code></pre><p>上面的<code>SocketTextStreamWordCount</code>是一个典型的Flink程序，他由一下及格部分构成：</p>
-<ul>
-<li>获得一个execution environment，</li>
-<li>加载/创建初始数据，</li>
-<li>指定此数据的转换，</li>
-<li>指定放置计算结果的位置，</li>
-<li>触发程序执行</li>
-</ul>
-<h2 id="DataSet-API"><a href="#DataSet-API" class="headerlink" title="DataSet API"></a>DataSet API</h2><p>分类：</p>
-<ul>
-<li>Source: 数据源创建初始数据集，例如来自文件或Java集合</li>
-<li>Transformation: 数据转换将一个或多个DataSet转换为新的DataSet</li>
-<li>Sink: 将计算结果存储或返回</li>
-</ul>
-<h3 id="DataSet-Sources"><a href="#DataSet-Sources" class="headerlink" title="DataSet Sources"></a>DataSet Sources</h3><h4 id="基于文件的"><a href="#基于文件的" class="headerlink" title="基于文件的"></a>基于文件的</h4><ul>
-<li><p><code>readTextFile(path)/ TextInputFormat</code>- 按行读取文件并将其作为字符串返回。</p>
-</li>
-<li><p><code>readTextFileWithValue(path)/ TextValueInputFormat</code>- 按行读取文件并将它们作为StringValues返回。StringValues是可变字符串。</p>
-</li>
-<li><p><code>readCsvFile(path)/ CsvInputFormat</code>- 解析逗号（或其他字符）分隔字段的文件。返回元组或POJO的DataSet。支持基本java类型及其Value对应作为字段类型。</p>
-</li>
-<li><p><code>readFileOfPrimitives(path, Class)/ PrimitiveInputFormat</code>- 解析新行（或其他字符序列）分隔的原始数据类型（如String或）的文件Integer。</p>
-</li>
-<li><p><code>readFileOfPrimitives(path, delimiter, Class)/ PrimitiveInputFormat</code>- 解析新行（或其他字符序列）分隔的原始数据类型的文件，例如String或Integer使用给定的分隔符。</p>
-</li>
-<li><p><code>readSequenceFile(Key, Value, path)/ SequenceFileInputFormat</code>- 创建一个JobConf并从类型为SequenceFileInputFormat，Key class和Value类的指定路径中读取文件，并将它们作为Tuple2 &lt;Key，Value&gt;返回。</p>
-</li>
-</ul>
-<h4 id="基于集合"><a href="#基于集合" class="headerlink" title="基于集合"></a>基于集合</h4><ul>
-<li><p><code>fromCollection(Collection)</code> - 从Java Java.util.Collection创建数据集。集合中的所有数据元必须属于同一类型。</p>
-</li>
-<li><p><code>fromCollection(Iterator, Class)</code> - 从迭代器创建数据集。该类指定迭代器返回的数据元的数据类型。</p>
-</li>
-<li><p><code>fromElements(T ...)</code> - 根据给定的对象序列创建数据集。所有对象必须属于同一类型。</p>
-</li>
-<li><p><code>fromParallelCollection(SplittableIterator, Class)</code>- 并行地从迭代器创建数据集。该类指定迭代器返回的数据元的数据类型。</p>
-</li>
-<li><p><code>generateSequence(from, to)</code> - 并行生成给定间隔中的数字序列。</p>
-</li>
-</ul>
-<h4 id="通用方法"><a href="#通用方法" class="headerlink" title="通用方法"></a>通用方法</h4><ul>
-<li><p><code>readFile(inputFormat, path)/ FileInputFormat</code>- 接受文件输入格式。</p>
-</li>
-<li><p><code>createInput(inputFormat)/ InputFormat</code>- 接受通用输入格式。</p>
-</li>
-</ul>
-<h4 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h4><pre><code>ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
+public static int computeKeyGroupForKeyHash(int keyHash, int maxParallelism) {
+  return HashPartitioner.INSTANCE.partition(keyHash, maxParallelism);
+}
 
-// 从本地文件系统读
-DataSet&lt;String&gt; localLines = env.readTextFile("file:///path/to/my/textfile");
+@Override
+public int partition(T key, int numPartitions) {
+  return MathUtils.murmurHash(Objects.hashCode(key)) % numPartitions;
+}</code></pre><p>如上实现我们了解到分配Key到指定的key-group的逻辑是利用key的hashCode和maxParallelism进行取余操作来分配的。如下图当parallelism=2,maxParallelism=10的情况下流上key与key-group的对应关系如下图所示：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Apache-Flink-State.resources/90D10775-4713-43B6-B7FE-F77334D29212.png" alt="fbb3b4b83d4ed020c55ff476a3f2f8f7"></p>
+<p>如上图key(a)的hashCode是97，与最大并发10取余后是7，被分配到了KG-7中，流上每个event都会分配到KG-0至KG-9其中一个Key-Group中。<br>每个Operator实例如何获取Key-Groups<br> 了解了Key-Groups概念和如何分配每个Key到指定的Key-Groups之后，我们看看如何计算每个Operator实例所处理的Key-Groups。 在KeyGroupRangeAssignment的computeKeyGroupRangeForOperatorIndex方法描述了分配算法：</p>
+<pre><code>public static KeyGroupRange computeKeyGroupRangeForOperatorIndex(
+  int maxParallelism,
+  int parallelism,
+  int operatorIndex) {
+    GroupRange splitRange = GroupRange.of(0, maxParallelism).getSplitRange(parallelism, operatorIndex);
+    int startGroup = splitRange.getStartGroup();
+    int endGroup = splitRange.getEndGroup();
+return new KeyGroupRange(startGroup, endGroup - 1);
+}
 
-// 读取HDFS文件
-DataSet&lt;String&gt; hdfsLines = env.readTextFile("hdfs://nnHost:nnPort/path/to/my/textfile");
+public GroupRange getSplitRange(int numSplits, int splitIndex) {
+    ...
+    final int numGroupsPerSplit = getNumGroups() / numSplits;
+    final int numFatSplits = getNumGroups() % numSplits;
 
-// 读取CSV文件
-DataSet&lt;Tuple3&lt;Integer, String, Double&gt;&gt; csvInput = env.readCsvFile("hdfs:///the/CSV/file").types(Integer.class, String.class, Double.class);
-
-// 读取CSV文件中的部分
-DataSet&lt;Tuple2&lt;String, Double&gt;&gt; csvInput = env.readCsvFile("hdfs:///the/CSV/file").includeFields("10010").types(String.class, Double.class);
-
-// 读取CSV映射为一个java类
-DataSet&lt;Person&gt;&gt; csvInput = env.readCsvFile("hdfs:///the/CSV/file").pojoType(Person.class, "name", "age", "zipcode");
-
-// 读取一个指定位置序列化好的文件
-DataSet&lt;Tuple2&lt;IntWritable, Text&gt;&gt; tuples =
- env.readSequenceFile(IntWritable.class, Text.class, "hdfs://nnHost:nnPort/path/to/file");
-
-// 从输入字符创建
-DataSet&lt;String&gt; value = env.fromElements("Foo", "bar", "foobar", "fubar");
-
-// 创建一个数字序列
-DataSet&lt;Long&gt; numbers = env.generateSequence(1, 10000000);
-
-// 从关系型数据库读取
-DataSet&lt;Tuple2&lt;String, Integer&gt; dbData =
-env.createInput(JDBCInputFormat.buildJDBCInputFormat()                    .setDrivername("org.apache.derby.jdbc.EmbeddedDriver")                   .setDBUrl("jdbc:derby:memory:persons")
-.setQuery("select name, age from persons")
-.setRowTypeInfo(new RowTypeInfo(BasicTypeInfo.STRING_TYPE_INFO, BasicTypeInfo.INT_TYPE_INFO))
-.finish());</code></pre><h3 id="DataSet-Transformation"><a href="#DataSet-Transformation" class="headerlink" title="DataSet Transformation"></a>DataSet Transformation</h3><blockquote>
-<p>详细可以参考官网:<a href="https://flink.sojb.cn/dev/batch/dataset_transformations.html#filter" target="_blank" rel="noopener">https://flink.sojb.cn/dev/batch/dataset_transformations.html#filter</a></p>
-</blockquote>
-<ul>
-<li>Map    </li>
-</ul>
-<p>采用一个数据元并生成一个数据元。</p>
-<pre><code>data.map(new MapFunction&lt;String, Integer&gt;() {
-  public Integer map(String value) { return Integer.parseInt(value); }
-});</code></pre><ul>
-<li>FlatMap    </li>
-</ul>
-<p>采用一个数据元并生成零个，一个或多个数据元。</p>
-<pre><code>data.flatMap(new FlatMapFunction&lt;String, String&gt;() {
-  public void flatMap(String value, Collector&lt;String&gt; out) {
-    for (String s : value.split(" ")) {
-      out.collect(s);
+    int startGroupForThisSplit;
+    int endGroupForThisSplit;
+    if (splitIndex &amp;lt; numFatSplits) {
+        startGroupForThisSplit = getStartGroup() + splitIndex * (numGroupsPerSplit + 1);
+        endGroupForThisSplit =   startGroupForThisSplit + numGroupsPerSplit + 1;
+    } else {
+        startGroupForThisSplit = getStartGroup() + splitIndex * numGroupsPerSplit + numFatSplits;
+        endGroupForThisSplit =  startGroupForThisSplit + numGroupsPerSplit;
     }
-  }
-});</code></pre><ul>
-<li>MapPartition</li>
-</ul>
-<p>在单个函数调用中转换并行分区。该函数将分区作为Iterable流来获取，并且可以生成任意数量的结果值。每个分区中的数据元数量取决于并行度和先前的 算子操作。</p>
-<pre><code>data.mapPartition(new MapPartitionFunction&lt;String, Long&gt;() {
-  public void mapPartition(Iterable&lt;String&gt; values, Collector&lt;Long&gt; out) {
-    long c = 0;
-    for (String s : values) {
-      c++;
+    if (startGroupForThisSplit &amp;gt;= endGroupForThisSplit) {
+            return GroupRange.emptyGroupRange();
+    } else {
+            return new GroupRange(startGroupForThisSplit, endGroupForThisSplit);
     }
-    out.collect(c);
-  }
-});</code></pre><ul>
-<li>Filter</li>
-</ul>
-<p>计算每个数据元的布尔函数，并保存函数返回true的数据元。<br>重要信息：系统假定该函数不会修改应用谓词的数据元。违反此假设可能会导致错误的结果。</p>
-<pre><code>data.filter(new FilterFunction&lt;Integer&gt;() {
-  public boolean filter(Integer value) { return value &gt; 1000; }
-});</code></pre><ul>
-<li>Reduce    </li>
-</ul>
-<p>通过将两个数据元重复组合成一个数据元，将一组数据元组合成一个数据元。Reduce可以应用于完整数据集或分组数据集。</p>
-<pre><code>data.reduce(new ReduceFunction&lt;Integer&gt; {
-  public Integer reduce(Integer a, Integer b) { return a + b; }
-});</code></pre><p>如果将reduce应用于分组数据集，则可以通过提供CombineHintto 来指定运行时执行reduce的组合阶段的方式 setCombineHint。在大多数情况下，基于散列的策略应该更快，特别是如果不同键的数量与输入数据元的数量相比较小（例如1/10）。</p>
-<ul>
-<li>ReduceGroup    </li>
-</ul>
-<p>将一组数据元组合成一个或多个数据元。ReduceGroup可以应用于完整数据集或分组数据集。</p>
-<pre><code>data.reduceGroup(new GroupReduceFunction&lt;Integer, Integer&gt; {
-  public void reduce(Iterable&lt;Integer&gt; values, Collector&lt;Integer&gt; out) {
-    int prefixSum = 0;
-    for (Integer i : values) {
-      prefixSum += i;
-      out.collect(prefixSum);
-    }
-  }
-});</code></pre><ul>
-<li>Aggregate    </li>
-</ul>
-<p>将一组值聚合为单个值。聚合函数可以被认为是内置的reduce函数。聚合可以应用于完整数据集或分组数据集。</p>
-<pre><code>Dataset&lt;Tuple3&lt;Integer, String, Double&gt;&gt; input = // [...]
-DataSet&lt;Tuple3&lt;Integer, String, Double&gt;&gt; output = input.aggregate(SUM, 0).and(MIN, 2);</code></pre><p>您还可以使用简写语法进行最小，最大和总和聚合。</p>
-<pre><code>Dataset&lt;Tuple3&lt;Integer, String, Double&gt;&gt; input = // [...]
-DataSet&lt;Tuple3&lt;Integer, String, Double&gt;&gt; output = input.sum(0).andMin(2);</code></pre><ul>
-<li>Distinct    </li>
-</ul>
-<p>返回数据集的不同数据元。它相对于数据元的所有字段或字段子集从输入DataSet中删除重复条目。</p>
-<pre><code>data.distinct();</code></pre><p>使用reduce函数实现Distinct。您可以通过提供CombineHintto 来指定运行时执行reduce的组合阶段的方式 setCombineHint。在大多数情况下，基于散列的策略应该更快，特别是如果不同键的数量与输入数据元的数量相比较小（例如1/10）。</p>
-<ul>
-<li>Join    </li>
-</ul>
-<p>通过创建在其键上相等的所有数据元对来连接两个数据集。可选地使用JoinFunction将数据元对转换为单个数据元，或使用FlatJoinFunction将数据元对转换为任意多个（包括无）数据元。请参阅键部分以了解如何定义连接键。</p>
-<pre><code>result = input1.join(input2)
-               .where(0)       // key of the first input (tuple field 0)
-               .equalTo(1);    // key of the second input (tuple field 1)</code></pre><p>您可以通过Join Hints指定运行时执行连接的方式。提示描述了通过分区或广播进行连接，以及它是使用基于排序还是基于散列的算法。<br>如果未指定提示，系统将尝试估算输入大小，并根据这些估计选择最佳策略。</p>
-<pre><code>// This executes a join by broadcasting the first data set
-// using a hash table for the broadcast data
-result = input1.join(input2, JoinHint.BROADCAST_HASH_FIRST)
-               .where(0).equalTo(1);</code></pre><p>请注意，连接转换仅适用于等连接。其他连接类型需要使用OuterJoin或CoGroup表示。</p>
-<ul>
-<li>OuterJoin    </li>
-</ul>
-<p>在两个数据集上执行左，右或全外连接。外连接类似于常规（内部）连接，并创建在其键上相等的所有数据元对。此外，如果在另一侧没有找到匹配的Keys，则保存“外部”侧（左侧，右侧或两者都满）的记录。匹配数据元对（或一个数据元和null另一个输入的值）被赋予JoinFunction以将数据元对转换为单个数据元，或者转换为FlatJoinFunction以将数据元对转换为任意多个（包括无）数据元。请参阅键部分以了解如何定义连接键。</p>
-<pre><code>input1.leftOuterJoin(input2) // rightOuterJoin or fullOuterJoin for right or full outer joins
-      .where(0)              // key of the first input (tuple field 0)
-      .equalTo(1)            // key of the second input (tuple field 1)
-      .with(new JoinFunction&lt;String, String, String&gt;() {
-          public String join(String v1, String v2) {
-             // NOTE:
-             // - v2 might be null for leftOuterJoin
-             // - v1 might be null for rightOuterJoin
-             // - v1 OR v2 might be null for fullOuterJoin
-          }
-      });
-</code></pre><ul>
-<li>CoGroup    </li>
-</ul>
-<p>reduce 算子操作的二维变体。将一个或多个字段上的每个输入分组，然后关联组。每对组调用转换函数。</p>
-<pre><code>data1.coGroup(data2)
-     .where(0)
-     .equalTo(1)
-     .with(new CoGroupFunction&lt;String, String, String&gt;() {
-         public void coGroup(Iterable&lt;String&gt; in1, Iterable&lt;String&gt; in2, Collector&lt;String&gt; out) {
-           out.collect(...);
-         }
-      });</code></pre><ul>
-<li>Cross    </li>
-</ul>
-<p>构建两个输入的笛卡尔积（交叉乘积），创建所有数据元对。可选择使用CrossFunction将数据元对转换为单个数据元</p>
-<pre><code>DataSet&lt;Integer&gt; data1 = // [...]
-DataSet&lt;String&gt; data2 = // [...]
-DataSet&lt;Tuple2&lt;Integer, String&gt;&gt; result = data1.cross(data2);</code></pre><p>注：交叉是一个潜在的非常计算密集型 算子操作它甚至可以挑战大的计算集群！建议使用crossWithTiny（）和crossWithHuge（）来提示系统的DataSet大小。</p>
-<ul>
-<li>Union    </li>
-</ul>
-<p>生成两个数据集的并集。</p>
-<pre><code>DataSet&lt;String&gt; data1 = // [...]
-DataSet&lt;String&gt; data2 = // [...]
-DataSet&lt;String&gt; result = data1.union(data2);</code></pre><ul>
-<li>Rebalance    </li>
-</ul>
-<p>均匀地Rebalance 数据集的并行分区以消除数据偏差。只有类似Map的转换可能会遵循Rebalance 转换。</p>
-<pre><code>DataSet&lt;String&gt; in = // [...]
-DataSet&lt;String&gt; result = in.rebalance()
-                           .map(new Mapper());
-</code></pre><ul>
-<li>Hash-Partition</li>
-</ul>
-<p>散列分区给定键上的数据集。键可以指定为位置键，表达键和键选择器函数。</p>
-<pre><code>DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; in = // [...]
-DataSet&lt;Integer&gt; result = in.partitionByHash(0)
-                            .mapPartition(new PartitionMapper());</code></pre><ul>
-<li>Range-Partition</li>
-</ul>
-<p>Range-Partition给定键上的数据集。键可以指定为位置键，表达键和键选择器函数。</p>
-<pre><code>DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; in = // [...]
-DataSet&lt;Integer&gt; result = in.partitionByRange(0)
-                            .mapPartition(new PartitionMapper());</code></pre><ul>
-<li>Custom Partitioning</li>
-</ul>
-<p>手动指定数据分区。<br>注意：此方法仅适用于单个字段键。</p>
-<pre><code>DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; in = // [...]
-DataSet&lt;Integer&gt; result = in.partitionCustom(Partitioner&lt;K&gt; partitioner, key)</code></pre><ul>
-<li>Sort Partition    </li>
-</ul>
-<p>本地按指定顺序对指定字段上的数据集的所有分区进行排序。可以将字段指定为元组位置或字段表达式。通过链接sortPartition（）调用来完成对多个字段的排序。</p>
-<pre><code>DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; in = // [...]
-DataSet&lt;Integer&gt; result = in.sortPartition(1, Order.ASCENDING)
-                            .mapPartition(new PartitionMapper());</code></pre><ul>
-<li>First-n    </li>
-</ul>
-<p>返回数据集的前n个（任意）数据元。First-n可以应用于常规数据集，分组数据集或分组排序数据集。分组键可以指定为键选择器函数或字段位置键。</p>
-<pre><code>DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; in = // [...]
-// regular data set
-DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; result1 = in.first(3);
-// grouped data set
-DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; result2 = in.groupBy(0)                                     .first(3);
-// grouped-sorted data set
-DataSet&lt;Tuple2&lt;String,Integer&gt;&gt; result3 = in.groupBy(0)                                     .sortGroup(1, Order.ASCENDING)                     .first(3);
-</code></pre><h3 id="DataSet-Sink"><a href="#DataSet-Sink" class="headerlink" title="DataSet Sink"></a>DataSet Sink</h3><p>数据接收器使用DataSet用于存储或返回。使用OutputFormat描述数据接收器算子操作 。Flink带有各种内置输出格式，这些格式封装在DataSet上的算子操作中：</p>
-<ul>
-<li>writeAsText()/ TextOutputFormat- 按字符串顺序写入数据元。通过调用每个数据元的toString（）方法获得字符串。</li>
-<li>writeAsFormattedText()/ TextOutputFormat- 按字符串顺序写数据元。通过为每个数据元调用用户定义的format（）方法来获取字符串。</li>
-<li>writeAsCsv(…)/ CsvOutputFormat- 将元组写为逗号分隔值文件。行和字段分隔符是可配置的。每个字段的值来自对象的toString（）方法。</li>
-<li>print()/ printToErr()/ print(String msg)/ printToErr(String msg)- 在标准输出/标准错误流上打印每个数据元的toString（）值。可选地，可以提供前缀（msg），其前缀为输出。这有助于区分不同的打印调用。如果并行度大于1，则输出也将与生成输出的任务的标识符一起添加。</li>
-<li>write()/ FileOutputFormat- 自定义文件输出的方法和基类。支持自定义对象到字节的转换。</li>
-<li>output()/ OutputFormat- 大多数通用输出方法，用于非基于文件的数据接收器（例如将结果存储在数据库中）。</li>
-</ul>
-<p>可以将DataSet输入到多个 算子操作。程序可以编写或打印数据集，同时对它们执行其他转换。</p>
-<p>示例：</p>
-<pre><code>// text data
-DataSet&lt;String&gt; textData = // [...]
+}</code></pre><p>上面代码的核心逻辑是先计算每个Operator实例至少分配的Key-Group个数，将不能整除的部分N个，平均分给前N个实例。最终每个Operator实例管理的Key-Groups会在GroupRange中表示，本质是一个区间值；下面我们就上图的case，说明一下如何进行分配以及扩容后如何重新分配。<br>假设上面的Stateful Operation节点的最大并行度maxParallelism的值是10，也就是我们一共有10个Key-Group，当我们并发是2的时候和并发是3的时候分配的情况如下图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/shw2018/cdn@1.0/sakura/img/loader/orange.progress-bar-stripe-loader.svg" data-original="https://hualei.site/medias/Apache-Flink-State.resources/FBDBA73F-4927-4834-8284-4893707EA6FB.png" alt="163e2e62bc6c6e513d7c7fb10cda954f"></p>
+<p>如上算法我们发现在进行扩容时候，大部分state还是落到本地的，如Task0只有KG-4被分出去，其他的还是保持在本地。同时我们也发现，一个job如果修改了maxParallelism的值那么会直接影响到Key-Groups的数量和key的分配，也会打乱所有的Key-Group的分配，目前在Apache Flink系统中统一将maxParallelism的默认值调整到4096，最大程度的避免无法扩容的情况发生。</p>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>本篇简单介绍了Apache Flink中State的概念，并重点介绍了OperatorState和KeyedState在扩容时候的处理方式。Apache Flink State是支撑Apache Flink中failover，增量计算，Window等重要机制和功能的核心设施。后续介绍failover，增量计算，Window等相关篇章中也会涉及State的利用，当涉及到本篇没有覆盖的内容时候再补充介绍。</p>
+<p>持续更新中…，如果遇到问题欢迎联系我，在文章最后评论区【留言和讨论】，当然，欢迎点击文章最后的打赏按键，请博主一杯冰阔乐，笑～**</p>
 
-// write DataSet to a file on the local file system
-textData.writeAsText("file:///my/result/on/localFS");
 
-// write DataSet to a file on a HDFS with a namenode running at nnHost:nnPort
-textData.writeAsText("hdfs://nnHost:nnPort/my/result/on/localFS");
+<table>
+  <tbody><tr>
+    <td><img width="100" src="https://hualei.site/medias/reward/alipay.bmp"></td>    <td><img width="100" src="https://hualei.site/medias/reward/wechat.bmp"></td>    <td><img width="100" src="https://hualei.site/medias/reward/zan.png"></td>   
+  </tr>
+</tbody></table>
 
-// write DataSet to a file and overwrite the file if it exists
-textData.writeAsText("file:///my/result/on/localFS", WriteMode.OVERWRITE);
-
-// tuples as lines with pipe as the separator "a|b|c"
-DataSet&lt;Tuple3&lt;String, Integer, Double&gt;&gt; values = // [...]
-values.writeAsCsv("file:///path/to/the/result/file", "\n", "|");
-
-// this writes tuples in the text formatting "(a, b, c)", rather than as CSV lines
-values.writeAsText("file:///path/to/the/result/file");
-
-// this writes values as strings using a user-defined TextFormatter object
-values.writeAsFormattedText("file:///path/to/the/result/file",
-    new TextFormatter&lt;Tuple2&lt;Integer, Integer&gt;&gt;() {
-        public String format (Tuple2&lt;Integer, Integer&gt; value) {
-            return value.f1 + " - " + value.f0;
-        }
-    });</code></pre><p>使用自定义输出格式：</p>
-<pre><code>DataSet&lt;Tuple3&lt;String, Integer, Double&gt;&gt; myResult = [...]
-
-// write Tuple DataSet to a relational database
-myResult.output(
-    // build and configure OutputFormat
-    JDBCOutputFormat.buildJDBCOutputFormat()
-                    .setDrivername("org.apache.derby.jdbc.EmbeddedDriver")
-                    .setDBUrl("jdbc:derby:memory:persons")
-                    .setQuery("insert into persons (name, age, height) values (?,?,?)")
-                    .finish()
-    );</code></pre><h2 id="序列化器"><a href="#序列化器" class="headerlink" title="序列化器"></a>序列化器</h2><ul>
-<li>Flink自带了针对诸如int，long，String等标准类型的序列化器</li>
-</ul>
-<ul>
-<li>针对Flink无法实现序列化的数据类型，我们可以交给Avro和Kryo</li>
-</ul>
-<ul>
-<li>使用方法：ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();</li>
-</ul>
-<pre><code>使用avro序列化：env.getConfig().enableForceAvro();
-使用kryo序列化：env.getConfig().enableForceKryo();
-使用自定义序列化：env.getConfig().addDefaultKryoSerializer(Class&lt;?&gt; type, Class&lt;? extends Serializer&lt;?&gt;&gt; serializerClass)
-</code></pre><h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><ul>
-<li><p>Java Tuple 和 Scala case class</p>
-</li>
-<li><p>Java POJOs：java实体类</p>
-</li>
-<li><p>Primitive Types<br>默认支持java和scala基本数据类型</p>
-</li>
-<li><p>General Class Types<br>默认支持大多数java和scala class</p>
-</li>
-<li><p>Hadoop Writables<br>支持hadoop中实现了org.apache.hadoop.Writable的数据类型</p>
-</li>
-</ul>
-<ul>
-<li>Special Types<br>例如scala中的Either Option 和Try</li>
-</ul>
 <script>
         document.querySelectorAll('.github-emoji')
           .forEach(el => {
@@ -1265,7 +1043,7 @@ myResult.output(
                     </span>
                     <a href="https://hualei.site" class="b-link-green">烂人不该拥有</a>
                     <i class="fa fa-angle-right fa-lg fa-fw text-color"></i>
-                    <a href="/posts/c749.html" class="b-link-green">Flink从入门到放弃(入门篇3)-DataSetAPI</a>
+                    <a href="/posts/8f1b.html" class="b-link-green">Apache-Flink-State</a>
                 </p>
             </div>
 
@@ -1585,29 +1363,30 @@ myResult.output(
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fa fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="fa fa-dot-circle-o"></i>&nbsp;本篇
+            </div>
             <div class="card">
-                <a href="/posts/26bb.html">
+                <a href="/posts/8f1b.html">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/8.jpg" class="responsive-img" alt="Flink从入门到放弃(入门篇4)-DataStreamAPI">
+                        <img src="/medias/featureimages/5.jpg" class="responsive-img" alt="Apache-Flink-State">
                         
-                        <span class="card-title">Flink从入门到放弃(入门篇4)-DataStreamAPI</span>
+                        <span class="card-title">Apache-Flink-State</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            DataStream算子将一个或多个DataStream转换为新DataStream。程序可以将多个转换组合成复杂的数据流拓扑。DataStreamAPI和DataSetAPI主要的区别在于Transformation部分。
+                            在流计算场景中，数据会源源不断的流入Apache Flink系统，每条数据进入Apache Flink系统都会触发计算。如果我们想进行一个Count聚合计算，那么每次触发计算是将历史上所有流入的数据重新新计算一次，还是每次计算都是在上一次计算结果之上进行增量计算呢？
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="fa fa-clock-o fa-fw icon-date"></i>2020-07-20
-                        </span>
+                            <span class="publish-date">
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2020-08-05
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fa fa-bookmark fa-fw icon-category"></i>
@@ -1620,6 +1399,7 @@ myResult.output(
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -1646,24 +1426,24 @@ myResult.output(
                 下一篇&nbsp;<i class="fa fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/posts/3ce2.html">
+                <a href="/posts/26bb.html">
                     <div class="card-image">
                         
                         
-                        <img src="/medias/featureimages/7.jpg" class="responsive-img" alt="Flink从入门到放弃(入门篇2)-本地环境搭建&构建第一个Flink应用">
+                        <img src="/medias/featureimages/8.jpg" class="responsive-img" alt="Flink从入门到放弃(入门篇4)-DataStreamAPI">
                         
-                        <span class="card-title">Flink从入门到放弃(入门篇2)-本地环境搭建&构建第一个Flink应用</span>
+                        <span class="card-title">Flink从入门到放弃(入门篇4)-DataStreamAPI</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
                     <div class="summary block-with-text">
                         
-                            一般来说，线上都是集群模式，那么单机模式方便我们测试和学习。
+                            DataStream算子将一个或多个DataStream转换为新DataStream。程序可以将多个转换组合成复杂的数据流拓扑。DataStreamAPI和DataSetAPI主要的区别在于Transformation部分。
                         
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="fa fa-clock-o fa-fw icon-date"></i>2020-07-08
+                                <i class="fa fa-clock-o fa-fw icon-date"></i>2020-07-20
                             </span>
                         <span class="publish-author">
                             
